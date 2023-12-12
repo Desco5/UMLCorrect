@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UMLCorrect - Project List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #000;
+            text-align: center;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .delete-button {
+            color: #fff;
+            border: none;
+            background-color: #ff0000;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        
+        .create-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        
+        .create-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 9999;
+        }
+        
+        .popup-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .popup-text {
+            margin-bottom: 20px;
+        }
+        
+        .popup-buttons {
+            margin-top: 20px;
+        }
+        
+        .popup-button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        
+        .cancel-button {
+            background-color: #3498db;
+            color: #fff;
+        }
+        
+        .delete-button.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .delete-button.disabled:hover {
+            background-color: #ccc;
+        }
+        
+        .delete-button.enabled {
+            background-color: #ff0000;
+        }
+        
+        .delete-button.enabled:hover {
+            background-color: #cc0000;
+        }
+    </style>
+    <script>
+        function showPopup(projectName, groupName, primaryKey) {
+            var popup = document.getElementById("popup");
+            var popupText = document.getElementById("popup-text");
+            var popupQuestion = document.getElementById("popup-question");
+            var answerInput = document.getElementById("answer-input");
+            var deleteButton = document.getElementById("delete-button-popup");
+            var overlay = document.getElementById("overlay");
+
+            var num1 = Math.floor(Math.random() * 9) + 1;
+            var num2 = Math.floor(Math.random() * 9) + 1;
+            var operation = Math.floor(Math.random() * 2);
+            var question;
+
+            switch (operation) {
+                case 0:
+                    question = num1 + " + " + num2;
+                    break;
+                case 1:
+                    question = num1 + " - " + num2;
+            }
+
+            popupText.innerHTML = "Are you sure you want to delete <strong>" + projectName + "</strong> associated with the group <strong>" + groupName + "</strong>?";
+            popupText.setAttribute("data-answer", eval(question));
+            popupQuestion.textContent = "Answer the following question to continue: " + question;
+            popupQuestion.setAttribute("data-answer", eval(question));
+
+            popup.style.display = "block";
+            overlay.style.display = "block";
+
+            deleteButton.classList.add("disabled");
+            deleteButton.disabled = true;
+
+            deleteButton.setAttribute("data-primary-key", primaryKey);
+            deleteButton.addEventListener("click", deleteProject);
+
+            answerInput.value = "";
+        }
+
+        function checkAnswer() {
+            var answerInput = document.getElementById("answer-input");
+            var deleteButton = document.getElementById("delete-button-popup");
+            var popupText = document.getElementById("popup-text");
+
+            var answer = parseInt(answerInput.value, 10);
+            var expectedAnswer = parseInt(popupText.getAttribute("data-answer"), 10);
+
+            if (answer === expectedAnswer) {
+                deleteButton.classList.remove("disabled");
+                deleteButton.disabled = false;
+            } else {
+                deleteButton.classList.add("disabled");
+                deleteButton.disabled = true;
+            }
+        }
+
+        function hidePopup() {
+            var popup = document.getElementById("popup");
+            var overlay = document.getElementById("overlay");
+
+            popup.style.display = "none";
+            overlay.style.display = "none";
+        }
+
+        function deleteProject() {
+        var primaryKey = this.getAttribute("data-primary-key");
+
+        var form = document.createElement("form");
+        form.method = "POST";
+
+        var csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+        form.appendChild(csrfInput);
+        var pkInput = document.createElement("input");
+        pkInput.type = "hidden";
+        pkInput.name = "primary_key";
+        pkInput.value = primaryKey;
+        form.appendChild(pkInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    </script>
+</head>
+<body>
+    <h1>UMLCorrect</h1>
+    <table>
+        <tr>
+            <th>Group Name</th>
+            <th>Project Name</th>
+            <th>Date Published</th>
+            <th>Amount of Sent Solutions</th>
+            <th>Deadline</th>
+            <th>Link</th>
+            <th>Delete</th>
+        </tr>
+        {% for project in project_list %}
+            <tr>
+                <td>{{ project.group_name }}</td>
+                <td>{{ project.project_name }}</td>
+                <td>{{ project.publication_date|date:"d/m/Y" }}</td>
+                <td>{{ project.solutions_sent }} out of {{ project.solutions_total }}</td>
+                <td>{{ project.deadline|date:"d/m/Y" }} </td>
+                {% if project.publication_date %}
+                    <td><a href="/professor/project/{{ project.dir }}">View</a></td>
+                {% else %}
+                    <td><a href="/professor/edit/{{ project.dir }}">Edit</a></td>
+                {% endif %}
+                <td>
+                    <button class="delete-button" data-project-name="{{ project.project_name }}" data-group-name="{{ project.group_name }}" data-primary-key="{{ project.pk }}" onclick="showPopup('{{ project.project_name }}', '{{ project.group_name }}', '{{ project.pk }}')">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+    </table>
+    
+    <a href="/professor/createproject" class="create-button">Create new project</a>
+    
+    <div id="popup" class="popup">
+        <div id="popup-inner" class="popup-inner">
+            <p id="popup-text" class="popup-text"></p>
+            <p id="popup-question" class="popup-question"></p>
+            <input type="text" id="answer-input" placeholder="Enter the answer" onkeyup="checkAnswer()">
+            <div class="popup-buttons">
+                <button class="popup-button cancel-button" onclick="hidePopup()">Cancel</button>
+                <button id="delete-button-popup" class="popup-button delete-button" onclick="hidePopup()" disabled="
+                disabled">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="overlay" class="overlay"></div>
+</body>
+</html>

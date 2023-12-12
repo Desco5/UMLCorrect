@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UMLCorrect - Create Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #000;
+            text-align: center;
+            padding: 0;
+        }
+
+        .input_body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50vh;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>UMLCorrect</h1>
+    <form action="/professor">
+        <input type="submit" value="Back" />
+    </form>
+    <div class="input_body">
+    <p>Upload a reference file (with .mdj extension) to begin the project creation</p>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file_input" accept=".mdj">
+        <input type="submit" value="Upload">
+    </form>
+    </div>
+</body>
+</html>

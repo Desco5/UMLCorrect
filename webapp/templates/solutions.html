@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UMLCorrect - Project List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #000;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        span {
+            margin-right:30px
+        }
+        .project-info {
+            margin-top: 30px;
+            margin-left: 30px;
+            font-size: larger;
+        }
+
+    </style>
+    <script>
+    </script>
+</head>
+<body>
+    <h1>UMLCorrect</h1>
+    <form action="/professor">
+        <input type="submit" value="Back" />
+    </form>
+    <div class="project-info">
+        <span><b>Group name:</b> {{ project.group_name }}</span>
+        <span><b>Project name:</b> {{ project.project_name }}</span>
+        <span><b>Date published:</b> {{ project.publication_date|date:"d/m/Y" }}</span>
+        <span><b>Sent solutions:</b> {{ project.solutions_sent }} / {{ project.solutions_total }}</span>
+        <span><b>Deadline:</b> {{ project.deadline|date:"d/m/Y" }}</span>
+    </div>
+    <table>
+        <tr>
+            <th>Student Name</th>
+            <th>Grade</th>
+            <th>Solution Upload Date</th>
+            <th>Solution viewer</th>
+        </tr>
+        {% for student in students %}
+            <tr>
+                <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                <td>{{ student.grade }}</td>
+                <td>{{ student.solution.solution_date }}</td>
+                {% if student.solution %}
+                <td><a href="/professor/project/{{ project.dir }}/{{ student.user.username }}/ ">View</a></td>
+                {% else %}
+                    <td>Not uploaded yet</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+    </table>
+</body>
+</html>

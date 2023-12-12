@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UMLCorrect - Edit project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>UMLCorrect</h1>
+    <form action="/professor/">
+        <input type="submit" value="Back" />
+    </form>
+    <form method="POST" id="editForm" enctype="multipart/form-data">
+    <div style="float:left; padding:200px">
+            {% csrf_token %}
+        <p><label for="groupName">Group Name:</label>
+            <input type="text" name="groupName" value="{{ project.group_name }}" /></p>
+
+        <p><label for="projectName">Project Name:</label>
+        <input type="text" name="projectName" value="{{ project.project_name }}" /></p>
+
+        <p><label for="deadline">Deadline:</label>
+        <input type="date" id="deadline" name="deadline" value={{ deadline }} /></p>
+
+        <p><label for="studentList">Update student list:</label>
+        <input type="file" name="studentList" accept=".xlsx,.xls,.xlsm,.xlsb,.odf,.ods,.odt"/></p>
+        <p>Number of students in list: {{ project.solutions_total }}</p>
+
+        <p><label for="reference">Update reference:</label>
+        <input type="file" name="reference" accept=".mdj"/></p>
+
+        <div style="margin-top: 50px">
+
+            <button style="margin-left: 50px" type="submit">Save</button>
+
+            <button style="margin-left: 100px" type="submit" id="publishButton">Publish</button>
+    </div>
+    </div>
+
+
+
+
+    <div style="float:left; margin-right: 100px;margin-bottom: 20px">
+        <div style="float: right">
+            <a> Is given? (Only use before publishing)</a>
+        </div>
+        <div>
+        {% for class in classList %}
+            <p>Class > {{ class.name }} &lt{{ class.type }} {% if class.stereotype %} &lt&lt{{ class.stereotype }}&gt&gt {% endif %} &gt <input name="class:{{ class.id }}" style="float: right" type="checkbox"></p>
+            {% for attribute in class.attributes %}
+            <p style="margin-left: 50px"> Att> {{ attribute.name }}: {{ attribute.type }} </p>
+            {% endfor %}
+            {% if class.attributes and class.operations %}
+            <p style="margin-left: 50px">--------------------------------</p>
+            {% endif %}
+            {% for method in class.operations %}
+            <p style="margin-left: 50px"> Ope> {{ method.name }}({% if method.parameters %}{% for parameter in method.parameters %}{% if forloop.last %}{{ parameter.name }}: {{ parameter.type }}{% else %}{{ parameter.name }}: {{ parameter.type }}, {% endif %}{% endfor %}{% endif %}){% if method.return %}: {{ method.return }}{% endif %}</p>
+            {% endfor %}
+            {% if class.attributes or class.operations and class.relations  %}
+            <p style="margin-left: 50px">--------------------------------</p>
+            {% endif %}
+            {% for relation in class.relations %}
+            <p style="margin-left: 50px"> Rel> {{ relation.name }}  &lt{{ relation.type }}&gt <input name="relation:{{ relation.id }}" style="float: right" type="checkbox"> </p>
+                <p style="margin-left: 150px">L-----> {{ relation.pointsTo }}</p>
+            {% endfor %}
+            <p>------------------------------------------------------------</p>
+        {% endfor %}
+        </div>
+    </div>
+    </form>
+
+
+    <script>
+    var publishForm = document.getElementById('editForm');
+    var publishButton = document.getElementById('publishButton');
+
+    publishButton.addEventListener('click', function(event) {
+        event.preventDefault();
+
+        var deadlineField = document.getElementsByName('deadline')[0];
+        if (deadlineField.value === '') {
+            alert('Please provide a deadline.');
+            return;
+        }
+
+        var solutionsTotal = parseInt("{{ project.solutions_total }}");
+        if (solutionsTotal === 0) {
+            alert('Cannot publish with 0 students.');
+            return;
+        }
+
+        var confirmation = confirm('Are you sure you want to publish? (Remember to save before publishing)'); // Display confirmation popup
+
+        if (confirmation) {
+            var publish = document.createElement('input');
+            publish.setAttribute('type', 'hidden');
+            publish.setAttribute('name', 'publish');
+            publish.setAttribute('value', 'True');
+            publishForm.appendChild(publish);
+            publishForm.submit();
+        }
+    });
+</script>
+</body>
+</html>

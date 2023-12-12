@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UMLCorrect - Student</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #000;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        span {
+            margin-right:30px
+        }
+
+        .send-button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+
+        .project-info {
+            margin-top: 30px;
+            margin-left: 30px;
+            margin-bottom: 50px;
+            font-size: larger;
+            text-align: center;
+        }
+        .solution-submit {
+            text-align: center;
+            margin-top: 100px;
+        }
+        .solution-info {
+            text-align: center;
+            margin-left: -30px;
+        }
+
+    </style>
+    <script>
+    </script>
+</head>
+<body>
+    <h1>UMLCorrect</h1>
+    <div>Hello {{ request.user.first_name }} {{ request.user.last_name }} </div>
+
+<div class="project-info">
+    <strong>Project:</strong> {{ project }} <strong>Group:</strong> {{ group }} <strong>Deadline:</strong> {{ deadline|date:"d/m/Y" }}
+</div>
+
+    {% if solution_date %}
+<div class="solution-info">
+    <strong>Solution uploaded:</strong> {{ solution_date|date:"d/m/Y" }}
+</div>
+    {% endif %}
+
+    {% if grade %}
+        <strong>Solution grade:</strong> {{ grade }}
+
+    {% elif late %}
+        <p style="text-align: center"><strong >It's past the deadline, you can no longer upload a solution.</strong></p>
+    {% else %}
+    <div class="solution-submit" >
+        <p style="margin-bottom:15px"><strong>Time left to deadline:</strong> {{ time_left.0 }} days {{ time_left.1 }} hours {{ time_left.2}} minutes {{ time_left.3 }} seconds</p>
+
+<form method="POST" enctype="multipart/form-data" action="/student/">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="solution_file">Upload Solution:</label>
+        <input type="file" name="file_input" accept=".mdj" required>
+    </div>
+    <div class="form-group">
+        <input type="submit" class="send-button" value="Upload Solution">
+    </div>
+</form>
+        </div>
+    {% endif %}
+</body>
+</html>

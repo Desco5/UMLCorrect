@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UMLCorrect - Correct</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #000;
+            text-align: center;
+        }
+        .student-info {
+            margin-left: 30px;
+            margin-bottom: 50px;
+            font-size: larger;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>UMLCorrect</h1>
+    <form action="/professor/project/{{ projectID }}/">
+        <input type="submit" value="Back" />
+    </form>
+
+        <div style="margin-left: 150px">
+            <p><strong>Grade:</strong></p>
+
+            {% if correctable and not grade  and not missing %}
+            <form method="POST" style="" enctype="multipart/form-data" id="correctForm"action="">
+            {% csrf_token %}
+            <input style="margin-left: 30px" type="number" name="grade" id="grade" min="0" max="10" />
+
+        <button style="margin-left: 15px" type="submit" id="correctButton">Correct</button>
+
+        </form>
+        {% elif grade  %}
+                <p style="margin-left: 75px"> {{ grade }}</p>
+                {% else %}
+                <p style="margin-left: 75px"> Can't correct until deadline is met</p>
+            {% endif %}
+        </div>
+
+    <div class="student-info">
+    <strong>Project:</strong> {{ project.project_name }} <strong style="margin-left: 20px">Group:</strong> {{ project.group_name }} <strong style="margin-left: 20px">Student:</strong> {{ student }}
+
+    </div>
+    {% if  missing %}
+        No solution uploaded
+    {% else %}
+    <div style="float:left; margin-right: 100px;margin-bottom: 20px">
+        <strong>Student solution analysis:</strong>
+        <div style="height:800px;width:500px;border:2px solid #ccc;margin-left: 200px;overflow: scroll">
+        {% for class in classList %}
+            <p>Class > {{ class.name }} &lt{{ class.type }} {% if class.stereotype %} &lt&lt{{ class.stereotype }}&gt&gt {% endif %} &gt</p>
+            {% for attribute in class.attributes %}
+            <p style="margin-left: 50px"> Att> {{ attribute.name }}: {{ attribute.type }} </p>
+            {% endfor %}
+            {% if class.attributes and class.operations %}
+            <p style="margin-left: 50px">--------------------------------</p>
+            {% endif %}
+            {% for method in class.operations %}
+            <p style="margin-left: 50px"> Ope> {{ method.name }}({% if method.parameters %}{% for parameter in method.parameters %}{% if forloop.last %}{{ parameter.name }}: {{ parameter.type }}{% else %}{{ parameter.name }}: {{ parameter.type }}, {% endif %}{% endfor %}{% endif %}){% if method.return %}: {{ method.return }}{% endif %}</p>
+            {% endfor %}
+            {% if class.attributes or class.operations and class.relations  %}
+            <p style="margin-left: 50px">--------------------------------</p>
+            {% endif %}
+            {% for relation in class.relations %}
+            <p style="margin-left: 50px"> Rel> {{ relation.name }}  &lt{{ relation.type }}&gt</p>
+                <p style="margin-left: 150px">L-----> {{ relation.pointsTo }}</p>
+            {% endfor %}
+            <p>------------------------------------------------------------</p>
+        {% endfor %}
+        </div>
+    </div>
+    <div style= "float:left; margin-left: 25px;margin-bottom: 20px;overflow: auto">
+        <strong>Automatic feedback:</strong>
+        <div style="margin-left: 150px; color: red">
+            {% for correction in correction_list %}
+                <p><strong> {{ correction }} </strong></p>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    {% endif %}
+
+    <script>
+    var correctForm = document.getElementById('correctForm');
+    var correctButton = document.getElementById('correctButton');
+
+    correctButton.addEventListener('click', function(event) {
+        event.preventDefault();
+
+        var grade = document.getElementById('grade');
+        if (grade.value == "") {
+            alert('Please provide a grade.');
+            return;
+        }
+
+        var confirmation = confirm('Are you sure you want to set that grade?');
+
+        if (confirmation) {
+            var correct = document.createElement('input');
+            correct.setAttribute('type', 'hidden');
+            correct.setAttribute('name', 'grade');
+            correct.setAttribute('value', grade.value);
+            correctForm.appendChild(correct);
+            correctForm.submit();
+        }
+    });
+</script>
+</body>
+</html>

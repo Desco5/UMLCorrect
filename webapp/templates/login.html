@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UMLCorrect - Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #000;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        span {
+            margin-right:30px
+        }
+        .error-message {
+            color: #ff0000;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>UMLCorrect</h1>
+    <div class="container">
+        <h2>Login</h2>
+        <form method="post" action="/login/">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group password-toggle">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <button type="button" id="togglePassword">👁</button>
+            </div>
+             {% if error_message %}
+                <div class="form-group">
+                    <p class="error-message">Nombre de usuario y/o contraseña incorrectos</p>
+                </div>
+                 {% else %}
+                 <p>&nbsp</p>
+            {% endif %}
+
+
+            <div class="form-group">
+                <button type="submit">Login</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function () {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePassword.textContent = '❌';
+            } else {
+                passwordInput.type = 'password';
+                togglePassword.textContent = '👁';
+            }
+        });
+    </script>
+</body>
+</html>
